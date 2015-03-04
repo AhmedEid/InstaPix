@@ -19,7 +19,7 @@
 #define kDefaultSearchRadiusInKm    1000
 #define kMaximumValueInKm           4500
 
-@interface AEMainMapViewController () <MKMapViewDelegate>
+@interface AEMainMapViewController () <MKMapViewDelegate, CLLocationManagerDelegate>
 
 //Data
 @property (nonatomic, strong) AEInstagramPhotosManager *instagramPhotosManager;
@@ -28,6 +28,7 @@
 //Views
 @property (nonatomic, strong) MBProgressHUD *hud;
 @property (nonatomic, strong) MKMapView *mapView;
+@property (nonatomic, strong) CLLocationManager *locationManager;
 @property (nonatomic, strong) UISlider *slider;
 
 //Gesture Recognizer
@@ -42,6 +43,16 @@
     self.title = @"InstaPix: Ahmed Eid";
     
     self.instagramPhotosManager = [AEInstagramPhotosManager new];
+    
+    // ** Don't forget to add NSLocationWhenInUseUsageDescription in MyApp-Info.plist and give it a string
+    
+    self.locationManager = [[CLLocationManager alloc] init];
+    self.locationManager.delegate = self;
+    
+    if ([self.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
+        [self.locationManager requestWhenInUseAuthorization];
+    }
+    [self.locationManager startUpdatingLocation];
     
     self.mapView = [[MKMapView alloc] initWithFrame:self.view.bounds];
     self.mapView.showsUserLocation = YES;
@@ -234,6 +245,11 @@
     CLLocationDistance distance = [self.mapView.userLocation.location distanceFromLocation:annotationLocation];
     CLLocationDistance distanceInKm = distance/1000;
     return distanceInKm;
+}
+
+// Location Manager Delegate Methods
+- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
+    self.mapView.showsUserLocation = YES;
 }
 
 @end
